@@ -1,13 +1,14 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { SpeedGauge } from "@/components/speed-gauge"
+import { Progress } from "@/components/ui/progress"
 import { VehicleMap } from "@/components/vehicle-map"
 import { MapPin, Clock, AlertTriangle, Gauge } from "lucide-react"
 import useVehicleWebSocket from "@/hooks/use-vehicle-ws"
 import { useEffect, useRef, useState } from "react"
 
-const DEFAULT_COORDS = { latitude: -17.838297198409037, longitude: 31.00733174581522, speed: 0 } // User default, speed 0
+// -17.828208524807525, 31.022180836051778
+const DEFAULT_COORDS = { latitude: -17.828208524807525, longitude: 31.022180836051778, speed: 0 } // User default, speed 0
 const SPEED_LIMIT = 60 // km/h
 
 export function Dashboard() {
@@ -58,7 +59,14 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <SpeedGauge currentSpeed={logData.speed} speedLimit={SPEED_LIMIT} />
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-full flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">0 km/h</span>
+                <span className="text-sm text-gray-600">{SPEED_LIMIT} km/h</span>
+              </div>
+              <Progress value={Math.min((logData.speed / SPEED_LIMIT) * 100, 100)} className="h-4" />
+              <div className="text-2xl font-bold text-center mt-2">{logData.speed.toFixed(1)} km/h</div>
+            </div>
           </CardContent>
         </Card>
 
@@ -71,7 +79,7 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <VehicleMap latitude={logData.latitude} longitude={logData.longitude} />
+            <VehicleMap latitude={data?.latitude ?? logData.latitude} longitude={data?.longitude ?? logData.longitude} />
           </CardContent>
         </Card>
       </div>
