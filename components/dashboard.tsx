@@ -4,13 +4,39 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SpeedGauge } from "@/components/speed-gauge"
 import { VehicleMap } from "@/components/vehicle-map"
 import { MapPin, Clock, AlertTriangle, Gauge } from "lucide-react"
+import useVehicleWebSocket from "@/hooks/use-vehicle-ws"
+import { useEffect, useRef, useState } from "react"
+
+const DEFAULT_COORDS = { latitude: -17.838297198409037, longitude: 31.00733174581522, speed: 0 } // User default, speed 0
+const SPEED_LIMIT = 60 // km/h
 
 export function Dashboard() {
-  // Mock data - you'll replace this with your MQTT data
-  const currentSpeed = 75 // km/h
-  const speedLimit = 60 // km/h
-  const location = "Main Street, Downtown"
-  const lastUpdate = "2 seconds ago"
+  const { data } = useVehicleWebSocket("ws://localhost:4000")
+  const [lastUpdate, setLastUpdate] = useState<string>("-")
+  const [logData, setLogData] = useState({ ...DEFAULT_COORDS })
+  const lastSent = useRef<number>(0)
+
+  useEffect(() => {
+    if (data) {
+      setLogData(data)
+      setLastUpdate(new Date().toLocaleTimeString())
+    }
+  }, [data])
+
+  // Send log to API every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (logData.latitude && logData.longitude && logData.speed) {
+        fetch("/api/logs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(logData),
+        })
+        lastSent.current = Date.now()
+      }
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [logData])
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -32,7 +58,7 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <SpeedGauge currentSpeed={currentSpeed} speedLimit={speedLimit} />
+            <SpeedGauge currentSpeed={logData.speed} speedLimit={SPEED_LIMIT} />
           </CardContent>
         </Card>
 
@@ -45,7 +71,7 @@ export function Dashboard() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <VehicleMap />
+            <VehicleMap latitude={logData.latitude} longitude={logData.longitude} />
           </CardContent>
         </Card>
       </div>
@@ -57,8 +83,10 @@ export function Dashboard() {
             <div className="flex items-center space-x-2">
               <MapPin className="h-8 w-8 text-blue-600" />
               <div>
-                <p className="text-sm font-medium text-gray-600">Current Location</p>
-                <p className="text-lg font-semibold">{location}</p>
+                <p className="text-sm font-medium text-gray-600">Current Coordinates</p>
+                <p className="text-lg font-semibold">
+                  {logData.latitude.toFixed(5)}, {logData.longitude.toFixed(5)}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -70,7 +98,7 @@ export function Dashboard() {
               <Gauge className="h-8 w-8 text-green-600" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Speed Limit</p>
-                <p className="text-lg font-semibold">{speedLimit} km/h</p>
+                <p className="text-lg font-semibold">{SPEED_LIMIT} km/h</p>
               </div>
             </div>
           </CardContent>
@@ -79,11 +107,11 @@ export function Dashboard() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className={`h-8 w-8 ${currentSpeed > speedLimit ? "text-red-600" : "text-green-600"}`} />
+              <AlertTriangle className={`h-8 w-8 ${logData.speed > SPEED_LIMIT ? "text-red-600" : "text-green-600"}`} />
               <div>
                 <p className="text-sm font-medium text-gray-600">Status</p>
-                <p className={`text-lg font-semibold ${currentSpeed > speedLimit ? "text-red-600" : "text-green-600"}`}>
-                  {currentSpeed > speedLimit ? "Over Limit" : "Within Limit"}
+                <p className={`text-lg font-semibold ${logData.speed > SPEED_LIMIT ? "text-red-600" : "text-green-600"}`}>
+                  {logData.speed > SPEED_LIMIT ? "Over Limit" : "Within Limit"}
                 </p>
               </div>
             </div>
