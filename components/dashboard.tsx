@@ -15,6 +15,7 @@ export function Dashboard() {
   const { data } = useVehicleWebSocket("ws://localhost:4000")
   const [lastUpdate, setLastUpdate] = useState<string>("-")
   const [logData, setLogData] = useState({ ...DEFAULT_COORDS })
+  const [locationName, setLocationName] = useState<string>("");
   const lastSent = useRef<number>(0)
 
   useEffect(() => {
@@ -23,6 +24,15 @@ export function Dashboard() {
       setLastUpdate(new Date().toLocaleTimeString())
     }
   }, [data])
+
+  // Fetch location name when coordinates change
+  useEffect(() => {
+    if (logData.latitude && logData.longitude) {
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${logData.latitude}&lon=${logData.longitude}`)
+        .then(res => res.json())
+        .then(data => setLocationName(data.display_name || ""));
+    }
+  }, [logData.latitude, logData.longitude]);
 
   // Send log to API every 5 seconds
   useEffect(() => {
@@ -91,10 +101,9 @@ export function Dashboard() {
             <div className="flex items-center space-x-2">
               <MapPin className="h-8 w-8 text-blue-600" />
               <div>
-                <p className="text-sm font-medium text-gray-600">Current Coordinates</p>
-                <p className="text-lg font-semibold">
-                  {logData.latitude.toFixed(5)}, {logData.longitude.toFixed(5)}
-                </p>
+                <p className="text-sm font-medium text-gray-600">Current Location</p>
+                <p className="text-xs text-gray-500 mb-1">{logData.latitude.toFixed(5)}, {logData.longitude.toFixed(5)}</p>
+                <p className="text-lg font-semibold truncate max-w-xs">{locationName || '...'}</p>
               </div>
             </div>
           </CardContent>
