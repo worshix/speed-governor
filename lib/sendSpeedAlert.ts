@@ -7,6 +7,8 @@ export async function sendSpeedAlert({ speed, latitude, longitude, to, from }: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_PASS,
     },
+    logger: true,
+    debug: true,
   });
 
   const mailOptions = {
@@ -16,5 +18,10 @@ export async function sendSpeedAlert({ speed, latitude, longitude, to, from }: {
     text: `Alert! Speed limit exceeded.\nSpeed: ${speed} m/s\nLocation: https://maps.google.com/?q=${latitude},${longitude}`,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent: ", info);
+  } catch (error) {
+    console.error("Error sending email: ", error);
+  }
 }

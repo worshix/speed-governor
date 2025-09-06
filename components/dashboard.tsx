@@ -6,6 +6,7 @@ import { VehicleMap } from "@/components/vehicle-map"
 import { MapPin, Clock, AlertTriangle, Gauge } from "lucide-react"
 import useVehicleWebSocket from "@/hooks/use-vehicle-ws"
 import { useEffect, useRef, useState } from "react"
+import { Input } from "@/components/ui/input"
 
 // -17.828208524807525, 31.022180836051778
 const DEFAULT_COORDS = { latitude: -17.828208524807525, longitude: 31.022180836051778, speed: 0 } // User default, speed 0
@@ -16,6 +17,7 @@ export function Dashboard() {
   const [lastUpdate, setLastUpdate] = useState<string>("-")
   const [logData, setLogData] = useState({ ...DEFAULT_COORDS })
   const [locationName, setLocationName] = useState<string>("");
+  const [emailTo, setEmailTo] = useState<string>("")
   const lastSent = useRef<number>(0)
 
   useEffect(() => {
@@ -41,13 +43,13 @@ export function Dashboard() {
         fetch("/api/logs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(logData),
+          body: JSON.stringify({ ...logData, emailTo }),
         })
         lastSent.current = Date.now()
       }
     }, 5000)
     return () => clearInterval(interval)
-  }, [logData])
+  }, [logData, emailTo])
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -58,6 +60,24 @@ export function Dashboard() {
           <span>Last update: {lastUpdate}</span>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Email Alert Recipient</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-600 mb-2">
+            Enter an email address to receive alerts when the speed limit is exceeded.
+          </p>
+          <Input
+            type="email"
+            placeholder="recipient@example.com"
+            value={emailTo}
+            onChange={(e) => setEmailTo(e.target.value)}
+            className="max-w-sm"
+          />
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Speed Gauge */}

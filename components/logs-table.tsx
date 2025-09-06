@@ -21,9 +21,16 @@ export function LogsTable() {
   const SPEED_LIMIT = 30;
 
   useEffect(() => {
-    fetch('/api/logs')
-      .then(res => res.json())
-      .then(data => setLogs(data));
+    const fetchLogs = () => {
+      fetch('/api/logs')
+        .then((res) => res.json())
+        .then((data) => setLogs(data));
+    };
+
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
