@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react"
 
 // -17.828208524807525, 31.022180836051778
 const DEFAULT_COORDS = { latitude: -17.828208524807525, longitude: 31.022180836051778, speed: 0 } // User default, speed 0
-const SPEED_LIMIT = 60 // km/h
+const SPEED_LIMIT = 30 // m/s
 
 export function Dashboard() {
   const { data } = useVehicleWebSocket("ws://localhost:4000")
@@ -71,11 +71,11 @@ export function Dashboard() {
           <CardContent>
             <div className="flex flex-col items-center space-y-4">
               <div className="w-full flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">0 km/h</span>
-                <span className="text-sm text-gray-600">{SPEED_LIMIT} km/h</span>
+                <span className="text-sm text-gray-600">0 m/s</span>
+                <span className="text-sm text-gray-600">{SPEED_LIMIT} m/s</span>
               </div>
               <Progress value={Math.min((logData.speed / SPEED_LIMIT) * 100, 100)} className="h-4" />
-              <div className="text-2xl font-bold text-center mt-2">{logData.speed.toFixed(1)} km/h</div>
+              <div className="text-2xl font-bold text-center mt-2">{logData.speed.toFixed(1)} m/s</div>
             </div>
           </CardContent>
         </Card>
@@ -115,7 +115,7 @@ export function Dashboard() {
               <Gauge className="h-8 w-8 text-green-600" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Speed Limit</p>
-                <p className="text-lg font-semibold">{SPEED_LIMIT} km/h</p>
+                <p className="text-lg font-semibold">{SPEED_LIMIT} m/s</p>
               </div>
             </div>
           </CardContent>

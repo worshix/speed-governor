@@ -7,7 +7,7 @@ export default function useVehicleWebSocket(url: string) {
   const [data, setData] = useState<{
     latitude: number;
     longitude: number;
-    speed: number; // km/hr
+    speed: number; // m/s
   } | null>(null);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function useVehicleWebSocket(url: string) {
           setData({
             latitude: msg.latitude,
             longitude: msg.longitude,
-            speed: msg.speed / 1000, // convert m/hr to km/hr
+            speed: msg.speed, // speed is already in m/s
           });
         }
       } catch {}
@@ -34,7 +34,7 @@ export default function useVehicleWebSocket(url: string) {
   }, [url]);
 
   // For sending data to the websocket
-  const send = (payload: any) => {
+  const send = (payload: Record<string, unknown>) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify(payload));
     }

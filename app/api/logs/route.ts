@@ -35,12 +35,12 @@ export async function POST(req: NextRequest) {
       locationName = geoData.display_name || '';
     } catch {}
 
-    // Save as km/hr
+    // Save as m/s
     const log = await prisma.log.create({
       data: {
         latitude,
         longitude,
-        speed, // already in km/hr
+        speed, // already in m/s
       },
     });
 
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Send alert to recipient only if speed is over limit
-    const SPEED_LIMIT = 60;
+    const SPEED_LIMIT = 30;
     if (speed > SPEED_LIMIT && emailTo) {
       await sendSpeedAlert({
         speed,

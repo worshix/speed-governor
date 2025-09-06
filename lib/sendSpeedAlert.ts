@@ -13,7 +13,7 @@ export async function sendSpeedAlert({ speed, latitude, longitude, to, from }: {
     from,
     to,
     subject: 'Speed Limit Exceeded!',
-    text: `Alert! Speed limit exceeded.\nSpeed: ${speed} km/h\nLocation: https://maps.google.com/?q=${latitude},${longitude}`,
+    text: `Alert! Speed limit exceeded.\nSpeed: ${speed} m/s\nLocation: https://maps.google.com/?q=${latitude},${longitude}`,
   };
 
   await transporter.sendMail(mailOptions);

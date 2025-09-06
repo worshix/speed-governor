@@ -18,7 +18,7 @@ type Log = {
 
 export function LogsTable() {
   const [logs, setLogs] = useState<Log[]>([]);
-  const SPEED_LIMIT = 60;
+  const SPEED_LIMIT = 30;
 
   useEffect(() => {
     fetch('/api/logs')
@@ -40,7 +40,7 @@ export function LogsTable() {
                 <TableHead>Time</TableHead>
                 <TableHead>Latitude</TableHead>
                 <TableHead>Longitude</TableHead>
-                <TableHead>Speed (km/h)</TableHead>
+                <TableHead>Speed (m/s)</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
